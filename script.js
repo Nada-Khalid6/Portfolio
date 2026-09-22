@@ -1,81 +1,275 @@
-// =====================================================
-// Mobile navigation toggle
-// =====================================================
-const navToggle = document.getElementById('navToggle');
-const navMenu = document.getElementById('navMenu');
+/* =========================================================
+   NADA KHALID PORTFOLIO
+   Main JavaScript
+   ========================================================= */
 
-navToggle.addEventListener('click', () => {
-  const isOpen = navMenu.classList.toggle('is-open');
-  navToggle.classList.toggle('is-open', isOpen);
-  navToggle.setAttribute('aria-expanded', isOpen);
-});
+document.addEventListener("DOMContentLoaded", () => {
 
-// Close the mobile menu after a link is clicked
-navMenu.querySelectorAll('.nav-link').forEach((link) => {
-  link.addEventListener('click', () => {
-    navMenu.classList.remove('is-open');
-    navToggle.classList.remove('is-open');
-    navToggle.setAttribute('aria-expanded', 'false');
-  });
-});
+  // ==============================
+  // Mobile Navigation
+  // ==============================
 
-// =====================================================
-// Highlight the current section in the nav while scrolling
-// =====================================================
-const sections = document.querySelectorAll('main section[id]');
-const navLinks = document.querySelectorAll('.nav-link');
+  const sidebar = document.getElementById("sidebar");
+  const mobileMenu = document.getElementById("mobileMenu");
 
-function setActiveLink() {
-  let currentId = sections[0]?.id;
-  const scrollPos = window.scrollY + 120;
+  mobileMenu?.addEventListener("click", () => {
+    sidebar?.classList.toggle("open");
 
-  sections.forEach((section) => {
-    if (section.offsetTop <= scrollPos) {
-      currentId = section.id;
+    const icon = mobileMenu.querySelector("i");
+
+    if (icon) {
+      icon.classList.toggle("fa-bars");
+      icon.classList.toggle("fa-xmark");
     }
   });
 
-  navLinks.forEach((link) => {
-    link.classList.toggle('is-active', link.getAttribute('href') === `#${currentId}`);
+
+  // Close mobile menu after clicking a navigation link
+
+  document.querySelectorAll(".nav-link").forEach(link => {
+
+    link.addEventListener("click", () => {
+
+      sidebar?.classList.remove("open");
+
+      const icon = mobileMenu?.querySelector("i");
+
+      if (icon) {
+        icon.classList.add("fa-bars");
+        icon.classList.remove("fa-xmark");
+      }
+
+    });
+
   });
-}
 
-window.addEventListener('scroll', setActiveLink);
-setActiveLink();
 
-// =====================================================
-// Contact form (front-end only — no backend attached)
-//
-// To make this form actually deliver messages, connect it to a
-// form backend service such as Formspree (https://formspree.io)
-// or EmailJS (https://www.emailjs.com). Typical steps:
-//   1. Create a free account with the service and a form/endpoint.
-//   2. Replace the fetch() call below with the service's snippet,
-//      or set the <form> "action" attribute to the endpoint URL
-//      and remove this JS handler so the form posts normally.
-// =====================================================
-const contactForm = document.getElementById('contactForm');
-const formStatus = document.getElementById('formStatus');
+  // ==============================
+  // Active Navigation Section
+  // ==============================
 
-contactForm.addEventListener('submit', (event) => {
-  event.preventDefault();
+  const sections = document.querySelectorAll("section[id]");
+  const navLinks = document.querySelectorAll(".nav-link");
 
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const message = document.getElementById('message').value.trim();
+  const observer = new IntersectionObserver(
+    (entries) => {
 
-  if (!name || !email || !message) {
-    formStatus.textContent = 'Please fill in every field before sending.';
-    return;
-  }
+      entries.forEach(entry => {
 
-  // No backend is connected yet — see the comment block above for
-  // how to wire this up to a real email-sending service.
-  formStatus.textContent = `Thanks, ${name}! This form isn't connected to a backend yet, so your message wasn't actually sent — see the setup notes in script.js.`;
-  contactForm.reset();
+        if (entry.isIntersecting) {
+
+          navLinks.forEach(link => {
+            link.classList.remove("active");
+          });
+
+          const activeLink = document.querySelector(
+            `.nav-link[href="#${entry.target.id}"]`
+          );
+
+          activeLink?.classList.add("active");
+
+        }
+
+      });
+
+    },
+    {
+      rootMargin: "-35% 0px -55% 0px",
+      threshold: 0
+    }
+  );
+
+  sections.forEach(section => {
+    observer.observe(section);
+  });
+
+
+  // ==============================
+  // Reveal Animation
+  // ==============================
+
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+
+      entries.forEach(entry => {
+
+        if (entry.isIntersecting) {
+
+          entry.target.classList.add("visible");
+
+          revealObserver.unobserve(entry.target);
+
+        }
+
+      });
+
+    },
+    {
+      threshold: 0.08
+    }
+  );
+
+  document.querySelectorAll(".reveal").forEach(element => {
+    revealObserver.observe(element);
+  });
+
+
+  // ==============================
+  // Certificates Slider
+  // ==============================
+
+  const certificateTrack =
+    document.getElementById("certificateTrack");
+
+  const certificatePrev =
+    document.getElementById("certPrev");
+
+  const certificateNext =
+    document.getElementById("certNext");
+
+
+  const scrollCertificates = (direction) => {
+
+    if (!certificateTrack) return;
+
+    const amount = Math.min(
+      certificateTrack.clientWidth * 0.78,
+      360
+    );
+
+    certificateTrack.scrollBy({
+      left: direction * amount,
+      behavior: "smooth"
+    });
+
+  };
+
+
+  certificatePrev?.addEventListener("click", () => {
+    scrollCertificates(-1);
+  });
+
+
+  certificateNext?.addEventListener("click", () => {
+    scrollCertificates(1);
+  });
+
+
+  // ==============================
+  // Certificate Modal
+  // ==============================
+
+  const modal =
+    document.getElementById("certificateModal");
+
+  const modalImage =
+    document.getElementById("modalImage");
+
+  const modalClose =
+    document.getElementById("modalClose");
+
+  const modalBackdrop =
+    document.getElementById("modalBackdrop");
+
+
+  document.querySelectorAll(".view-cert").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      const image = button.dataset.image;
+
+      if (!image || !modal || !modalImage) return;
+
+      modalImage.src = image;
+
+      modal.classList.add("open");
+
+      modal.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      document.body.style.overflow = "hidden";
+
+    });
+
+  });
+
+
+  const closeModal = () => {
+
+    if (!modal) return;
+
+    modal.classList.remove("open");
+
+    modal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    if (modalImage) {
+      modalImage.src = "";
+    }
+
+    document.body.style.overflow = "";
+
+  };
+
+
+  modalClose?.addEventListener(
+    "click",
+    closeModal
+  );
+
+
+  modalBackdrop?.addEventListener(
+    "click",
+    closeModal
+  );
+
+
+  // Close modal with Escape key
+
+  document.addEventListener("keydown", event => {
+
+    if (
+      event.key === "Escape" &&
+      modal?.classList.contains("open")
+    ) {
+
+      closeModal();
+
+    }
+
+  });
+
+
+  // ==============================
+  // Contact Form
+  // ==============================
+
+  const form =
+    document.getElementById("contactForm");
+
+
+  form?.addEventListener("submit", event => {
+
+    event.preventDefault();
+
+    const name =
+      form.elements.name?.value.trim();
+
+
+    if (!name) return;
+
+
+    alert(
+      `Thanks, ${name}! The contact form is currently a front-end demo. Connect a form service/backend to receive messages.`
+    );
+
+
+    form.reset();
+
+  });
+
 });
-
-// =====================================================
-// Footer year
-// =====================================================
-document.getElementById('year').textContent = new Date().getFullYear();
